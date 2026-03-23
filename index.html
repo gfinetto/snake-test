@@ -35,35 +35,50 @@
             </div>
         </div>
         
-        <!-- Container do Jogo (Glassmorphism e Flutuante) -->
-        <div class="game-wrapper glass-panel">
+        <!-- Container do Jogo e D-PAD em Wrapper Colunar -->
+        <div class="game-area-wrapper">
+            <div class="game-wrapper glass-panel">
             <div class="game-placeholder" id="game-container">
-                <div id="start-screen" class="overlay-screen">
-                    <span class="pulse-text">PRESS ENTER</span>
-                </div>
-                <div id="game-over-screen" class="overlay-screen static-noise" style="display: none;">
-                    <div class="game-over-modal">
-                        <h2 class="pulse-text" style="color: var(--color-accent-item); text-align: center; margin-bottom: 0.5rem; font-size: 1.8rem;">SYSTEM FAILURE</h2>
-                        <p style="font-family: var(--font-game); text-align: center; margin-bottom: 1.5rem; font-size: 0.9rem;">FRAGMENTOS: <span id="final-score" style="color: var(--color-accent-snake); font-weight: bold;">0</span></p>
-                        
-                        <div class="input-group">
-                            <label for="player-name">IDENTIFIQUE_O_FRAGMENTO:</label>
-                            <input type="text" id="player-name" maxlength="15" placeholder="[ ___ ]" autocomplete="off">
-                            <button id="save-score-btn">SALVAR LOG</button>
-                        </div>
-                        
-                        <div class="ranking-container">
-                            <h3 style="font-family: var(--font-game);">[ NEURAL_DECAY_LOGS ]</h3>
-                            <!-- Fonte glitchada sendo reaproveitada do nosso tokens (text-corrupted) -->
-                            <ul id="ranking-list" class="text-corrupted"></ul>
-                        </div>
-                        
-                        <p style="font-family: var(--font-game); opacity: 0.5; text-align: center; margin-top: 1.5rem; font-size: 0.75rem;">PRESS [ENTER] TO REBOOT</p>
+                <div id="overlay-inicial" class="overlay-screen static-noise" style="display: flex; flex-direction: column; gap: 1.5rem; background: rgba(0,0,0,0.9);">
+                    <h2 class="pulse-text" style="color: var(--color-accent-snake); font-size: 1.5rem;">INIT_SEQUENCE</h2>
+                    
+                    <div style="width: 100%; text-align: center;">
+                        <label for="start-player-name" style="font-family: var(--font-game); color: #ccc; font-size: 0.8rem; display: block; margin-bottom: 0.5rem; letter-spacing: 1px;">IDENTIFIQUE_O_FRAGMENTO (NOME):</label>
+                        <input type="text" id="start-player-name" maxlength="15" placeholder="[ _ ]" autocomplete="off" class="phosphor-caret" style="width: 100%; max-width: 250px; background: transparent; border: 1px dashed rgba(255,255,255,0.3); color: #fff; padding: 0.5rem; text-align: center; font-family: var(--font-game); text-transform: uppercase;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; width: 100%; justify-content: center;">
+                        <button id="btn-modo-estavel" class="terminal-btn stable-btn">[ MODO_ESTÁVEL ]<br><span style="font-size: 0.6rem; opacity: 0.7;">NO EFFECTS</span></button>
+                        <button id="btn-modo-chaos" class="terminal-btn chaos-btn">[ MODO_CHAOS ]<br><span style="font-size: 0.6rem; opacity: 0.7;">NEURAL DECAY</span></button>
                     </div>
                 </div>
+                    <div id="game-over-screen" class="overlay-screen static-noise" style="display: none;">
+                        <div class="game-over-modal" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; max-width: 400px; background: rgba(0, 0, 0, 0.85); padding: 2rem; border: 1px dashed var(--color-accent-item); box-shadow: 0 0 20px rgba(255, 0, 255, 0.2);">
+                            <h2 class="pulse-text" style="color: var(--color-accent-item); text-align: center; margin-bottom: 0.5rem; font-size: 1.5rem;">SISTEMA_CORROMPIDO:<br>RESULTADO_FINAL</h2>
+                            <p style="font-family: var(--font-game); text-align: center; margin-bottom: 2rem; font-size: 0.9rem;">FRAGMENTOS: <span id="final-score" style="color: var(--color-accent-snake); font-weight: bold;">0</span></p>
+
+                            <div class="ranking-container" style="width: 100%;">
+                                <h3 style="font-family: var(--font-game); text-align: center;">[ REGISTRO_DE_FRAGMENTAÇÃO ]</h3>
+                                <ul id="ranking-list" class="text-corrupted"></ul>
+                            </div>
+                            
+                            <button id="restart-btn" class="terminal-btn chaos-btn" style="margin-top: 2rem;">[ REINICIALIZAR_CONEXAO ]</button>
+                        </div>
+                    </div>
                 <canvas id="gameCanvas" width="400" height="400"></canvas>
             </div>
         </div>
+
+        <!-- D-Pad Tátil para Smartphone -->
+        <div id="mobile-dpad" class="mobile-dpad">
+            <button class="dpad-btn" data-key="ArrowUp">ʌ</button>
+            <div class="dpad-mid">
+                <button class="dpad-btn" data-key="ArrowLeft">&lt;</button>
+                <button class="dpad-btn" data-key="ArrowDown">V</button>
+                <button class="dpad-btn" data-key="ArrowRight">&gt;</button>
+            </div>
+        </div>
+    </div>
     </main>
     <script src="./game.js"></script>
 </body>

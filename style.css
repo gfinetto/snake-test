@@ -6,15 +6,28 @@
 }
 
 body {
-    /* Usando os Design Tokens */
     background-color: var(--color-bg-dark);
-    color: #ffffff;
-    font-family: var(--font-game);
+    color: #fff;
+    font-family: var(--font-title);
     min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    overflow-x: hidden;
+    position: relative; /* Keep this for child positioning */
+    align-items: center; /* Keep this for content alignment */
+}
+
+/* Efeito CRT Monitor (Scanlines e RGB Bias) */
+body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 9999;
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none; /* Garante que você consiga clicar nos botões por baixo */
 }
 
 /* ======== Textura de Ruído (Noise) ======== */
@@ -123,11 +136,19 @@ h1.hero-title .accent {
 }
 
 /* ======== Container do Jogo ======== */
-.game-wrapper {
+.game-area-wrapper {
     flex: 0 0 auto;
+    margin-right: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.game-wrapper {
     width: clamp(350px, 40vw, 650px);
     aspect-ratio: 1;
-    margin-right: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -164,7 +185,9 @@ h1.hero-title .accent {
 
 canvas {
     width: 100%;
-    height: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1; /* Força proporção 1:1 nativa no escalonamento width */
     object-fit: contain;
     image-rendering: pixelated; /* Mantém o aspecto retro em caso de scale */
 }
@@ -190,7 +213,7 @@ canvas {
     50% { opacity: 0.3; }
 }
 
-/* ======== Mobile ======== */
+/* ======== Tablets e Monitores Menores ======== */
 @media (max-width: 1100px) {
     .hero {
         flex-direction: column;
@@ -200,7 +223,7 @@ canvas {
     }
     .hero-content {
         left: 0;
-        margin-bottom: 4rem;
+        margin-bottom: 2rem;
         margin-top: 2rem;
     }
     h1.hero-title .accent {
@@ -209,34 +232,67 @@ canvas {
     .hero-subtitle {
         margin-left: 0;
     }
+    .score-container {
+        margin-left: 0;
+    }
     .game-wrapper {
         margin-right: 0;
-        width: 90vw;
+        width: 80vw;
+        max-width: 500px;
     }
 }
 
-/* ======== Efeitos de Corrupção Progressiva (Decay) ======== */
-.decay-1 { 
-    filter: contrast(1.1) brightness(1.1); 
-    text-shadow: 0 0 10px rgba(180, 255, 180, 0.4); /* Verde pálido */
+/* ======== Smartphones (Mobile 100%) ======== */
+@media (max-width: 768px) {
+    .hero {
+        padding: 1rem 0.5rem;
+    }
+    h1.hero-title {
+        /* Diminui pro título (inclusive o 'NEURAL_DECAY' modal) não vazar da tela */
+        font-size: clamp(3rem, 15vw, 6rem); 
+        line-height: 0.9;
+    }
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    .game-area-wrapper {
+        margin-right: 0;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    .game-wrapper {
+        width: 95vw; /* Container do jogo ocupa 95% em mobile */
+    }
+    .mobile-dpad {
+        display: flex; /* Revela o D-Pad Touch Tático apenas no celular */
+    }
+    .game-over-modal {
+        width: 95%;     /* O Modal de game over não vaza da tela tbm */
+        padding: 1rem;
+    }
 }
-.decay-1 .noise-texture { opacity: 0.15; }
 
-.decay-2 { 
-    animation: pulseBg 2s infinite alternate; 
+/* ======== Efeitos de Corrupção Dinâmicos (Update 2.0) ======== */
+.glitch-flash {
+    /* Dispara por 200ms apenas na mordida */
+    animation: constantShake 0.1s infinite;
+    filter: saturate(2) hue-rotate(90deg) contrast(1.2) invert(0.1);
 }
-.decay-2 .game-wrapper {
-    transform: skew(-2deg, 1.5deg); /* Leve inclinação */
-}
-.decay-2 .noise-texture { opacity: 0.25; }
 
-.decay-3 { 
-    filter: invert(0.05) sepia(0.3) contrast(1.5);
+.decay-critical {
+    /* Só roda a partir de 20 pontos */
+    animation: pulseBg 2s infinite alternate;
+    filter: contrast(1.5) saturate(1.5);
 }
-.decay-3 main {
-    animation: constantShake 0.1s infinite; /* Ponto de Ruptura (tremedeira extrema) */
+.decay-critical .game-wrapper {
+    transform: skew(-2deg, 1.5deg);
 }
-.decay-3 .noise-texture { opacity: 0.4; }
+
+.dead-system {
+    /* Sistema Morto (Game Over Preto e Branco) */
+    filter: grayscale(1) brightness(0.6) contrast(1.4);
+    pointer-events: auto;
+}
 
 @keyframes pulseBg {
     0% { background-color: var(--color-bg-dark); }
@@ -347,4 +403,76 @@ canvas {
     padding: 0.3rem 0;
     color: #ccc;
     border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+}
+
+/* Efeito Caret Verde Fósforo da Consciência */
+.phosphor-caret {
+    caret-color: #39ff14;
+    color: #39ff14 !important;
+    text-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+}
+.phosphor-caret:focus {
+    border-color: #39ff14 !important;
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.5) !important;
+}
+
+/* Custom Terminal Buttons for Startup Overlay */
+.terminal-btn {
+    background: transparent;
+    border: 1px solid currentColor;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-game);
+    font-weight: bold;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    line-height: 1.4;
+}
+.stable-btn {
+    color: #fff;
+    border-color: rgba(255,255,255,0.5);
+}
+.stable-btn:hover {
+    background: #fff;
+    color: #000;
+}
+.chaos-btn {
+    color: var(--color-accent-item);
+    border-color: var(--color-accent-item);
+    text-shadow: 0 0 5px var(--color-accent-item);
+    box-shadow: inset 0 0 10px rgba(255, 0, 255, 0.1);
+}
+.chaos-btn:hover {
+    background: var(--color-accent-item);
+    color: #000;
+}
+
+/* Mobile D-Pad Touch Controls */
+.mobile-dpad {
+    display: none; /* Escondido por padrão no Desktop */
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    position: relative;
+    z-index: 100;
+}
+.dpad-mid { display: flex; gap: 1.5rem; }
+.dpad-btn {
+    background: rgba(0,0,0,0.6); /* Cor base */
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    color: var(--color-accent-snake);
+    width: 65px; height: 65px;
+    border-radius: 8px;
+    font-size: 1.8rem;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-game); font-weight: 900;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+.dpad-btn:active {
+    background: var(--color-accent-snake);
+    color: #000;
+    transform: scale(0.9);
 }
