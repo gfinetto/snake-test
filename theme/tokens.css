@@ -1,0 +1,26 @@
+:root {
+  /* Cores - Cyber-Retro */
+  --color-bg-dark: #050505;
+  --color-accent-snake: #00ffff; /* Neon Cyan */
+  --color-accent-item: #ff00ff; /* Electric Pink */
+
+  /* Tipografia */
+  --font-title: 'Space Grotesk', sans-serif;
+  --font-game: 'JetBrains Mono', monospace;
+
+  /* Efeito Glassmorphism (Leve) */
+  --glass-bg: rgba(255, 255, 255, 0.05); /* Fundo quase transparente */
+  --glass-border: rgba(255, 255, 255, 0.1); /* Borda muito suave */
+  --glass-blur: blur(8px); /* Desfoque do fundo original */
+  --glass-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); /* Sombra suave */
+}
+
+/* Classe utilitária para o Glassmorphism */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 12px;
+}
