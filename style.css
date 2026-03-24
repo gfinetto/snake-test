@@ -517,3 +517,8 @@ canvas {
     background: rgba(57, 255, 20, 0.1);
     opacity: 1;
 }
+
+.rare-glitch {
+    filter: invert(1) hue-rotate(180deg) !important;
+    transition: none;
+}

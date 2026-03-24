@@ -90,6 +90,7 @@ let snake = [];
 let px = 10, py = 10;
 let dx = 0, dy = 0;
 let appleX = 15, appleY = 15;
+let appleSpawnTime = 0;
 let score = 0;
 let baseSpeed = 150; // ms por frame (quanto menor, mais rápido)
 let gameInterval;
@@ -118,7 +119,7 @@ function showMenu() {
     stopBgHum();
     gameOverScreen.style.display = 'none';
     overlayInicial.style.display = 'flex';
-    document.body.classList.remove('dead-system', 'impact-effect', 'decay-critical');
+    document.body.classList.remove('dead-system', 'impact-effect', 'decay-critical', 'rare-glitch');
     noiseTexture.style.opacity = 0.08;
     setTimeout(() => startPlayerNameInput.focus(), 50);
 }
@@ -136,10 +137,11 @@ function resetGame() {
     dx = 1;
     dy = 0;
     score = 0;
+    infectionTextTimer = 0;
     updateScoreUI();
     baseSpeed = 150; // Reseta velocidade
     
-    document.body.classList.remove('dead-system');
+    document.body.classList.remove('dead-system', 'rare-glitch');
     updatePassiveDecay(0); // Reseta a corrupção visual e passiva com currentScore 0
     
     if (gameMode === 'chaos') {
@@ -176,6 +178,19 @@ function triggerAppleGlitch() {
     setTimeout(() => {
         document.body.classList.remove('impact-effect');
     }, 200);
+}
+
+function triggerRareGlitch() {
+    if (gameMode !== 'chaos') return;
+
+    if (Math.random() < 0.01) {
+        if (!document.body.classList.contains('rare-glitch')) {
+            document.body.classList.add('rare-glitch');
+            setTimeout(() => {
+                document.body.classList.remove('rare-glitch');
+            }, 1000);
+        }
+    }
 }
 
 function updatePassiveDecay(currentScore) {
@@ -254,6 +269,14 @@ function manageTextGlitch(currentScore) {
     }, speed);
 }
 
+let infectionTextTimer = 0;
+let currentInfectionText = '';
+
+function showInfectionStatus(currentScore) {
+    currentInfectionText = `NÍVEL_DE_INFECÇÃO: ${currentScore * 10}%`;
+    infectionTextTimer = Date.now() + 2000;
+}
+
 // ========================
 // LOOP E LÓGICA
 // ========================
@@ -282,6 +305,15 @@ function gameLoop() {
     
     snake.push(newHead);
     
+    triggerRareGlitch();
+    
+    // Timer para o fim da fruta (Chaos Mode)
+    if (gameMode === 'chaos') {
+        if (Date.now() - appleSpawnTime > 7000) {
+            placeApple();
+        }
+    }
+    
     // Lógica da Maçã (Item / Dado)
     if (px === appleX && py === appleY) {
         score += 5; // Ajustado para 5 por maçã pra encaixar perfeitamente com os leveis
@@ -289,6 +321,11 @@ function gameLoop() {
         playSystemSound('pickup');
         triggerAppleGlitch(); // O Efeito de batida de 200ms
         updatePassiveDecay(score); // Avalia mudanças graduais e radicais
+        
+        if (score % 10 === 0) {
+            showInfectionStatus(score);
+        }
+        
         placeApple();
         
         // CRESCE e AUMENTA DIFICULDADE
@@ -316,7 +353,7 @@ function systemShutdown() {
     if (glitchInterval) clearInterval(glitchInterval);
     
     // Aplique um filtro de grayscale(100%) em toda a Landing Page
-    document.body.classList.remove('impact-effect', 'decay-critical', 'game-active');
+    document.body.classList.remove('impact-effect', 'decay-critical', 'game-active', 'rare-glitch');
     document.body.classList.add('dead-system');
     
     // UI do Modal
@@ -368,6 +405,7 @@ function placeApple() {
             }
         }
     }
+    appleSpawnTime = Date.now();
 }
 
 // ========================
@@ -394,11 +432,24 @@ function draw() {
     }
 
     // ITEM = MAÇÃ = DADOS
-    ctx.fillStyle = colorApple;
-    ctx.shadowBlur = 25; // Apple Glow intenso
-    ctx.shadowColor = colorApple; // Rosa Neon
-    // O item é um pouco menor que o grid pra dar o aspecto quadradinho legal
-    ctx.fillRect(appleX * gridSize + 2, appleY * gridSize + 2, gridSize - 4, gridSize - 4);
+    let drawApple = true;
+    if (gameMode === 'chaos') {
+        let elapsed = Date.now() - appleSpawnTime;
+        if (elapsed > 5000) { // Últimos 2 segundos (do total de 7)
+            // Tensão visual: Pisca mudando on/off a cada 100ms
+            if (Math.floor(Date.now() / 100) % 2 === 0) {
+                drawApple = false;
+            }
+        }
+    }
+    
+    if (drawApple) {
+        ctx.fillStyle = colorApple;
+        ctx.shadowBlur = 25; // Apple Glow intenso
+        ctx.shadowColor = colorApple; // Rosa Neon
+        // O item é um pouco menor que o grid pra dar o aspecto quadradinho legal
+        ctx.fillRect(appleX * gridSize + 2, appleY * gridSize + 2, gridSize - 4, gridSize - 4);
+    }
     
     // COBRA = NEON CYAN
     ctx.fillStyle = colorSnake;
@@ -420,6 +471,21 @@ function draw() {
     
     // Reseta o glow para não bugar o resto do ctx
     ctx.shadowBlur = 0;
+
+    // Desenha o status de infecção centralizado
+    if (Date.now() < infectionTextTimer) {
+        ctx.fillStyle = rootStyles.getPropertyValue('--accent-primary').trim() || '#39ff14';
+        ctx.font = "bold 22px 'JetBrains Mono', monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.fillText(currentInfectionText, canvas.width / 2, canvas.height / 2);
+        
+        ctx.shadowBlur = 0;
+        ctx.textAlign = "start";
+        ctx.textBaseline = "alphabetic";
+    }
 }
 
 // ========================
