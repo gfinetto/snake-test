@@ -7,6 +7,7 @@ const gameOverScreen = document.getElementById('game-over-screen');
 const finalScoreDisplay = document.getElementById('final-score');
 const rankingList = document.getElementById('ranking-list');
 const restartBtn = document.getElementById('restart-btn');
+const homeBtn = document.getElementById('home-btn');
 const noiseTexture = document.querySelector('.noise-texture');
 
 const overlayInicial = document.getElementById('overlay-inicial');
@@ -117,12 +118,18 @@ function showMenu() {
     stopBgHum();
     gameOverScreen.style.display = 'none';
     overlayInicial.style.display = 'flex';
-    document.body.classList.remove('dead-system', 'glitch-flash', 'decay-critical');
+    document.body.classList.remove('dead-system', 'impact-effect', 'decay-critical');
     noiseTexture.style.opacity = 0.08;
     setTimeout(() => startPlayerNameInput.focus(), 50);
 }
 
 function resetGame() {
+    const textTargets = document.querySelectorAll('.hero-title, .hero-subtitle');
+    textTargets.forEach(el => {
+        if (!el.dataset.originalHtml) el.dataset.originalHtml = el.innerHTML;
+        else el.innerHTML = el.dataset.originalHtml;
+    });
+
     snake = [{x: 10, y: 10}];
     px = 10;
     py = 10;
@@ -143,6 +150,7 @@ function resetGame() {
     
     placeApple();
     gameStatus = 'PLAYING';
+    document.body.classList.add('game-active');
     gameOverScreen.style.display = 'none';
     
     if (gameInterval) clearInterval(gameInterval);
@@ -163,17 +171,16 @@ let glitchInterval;
 function triggerAppleGlitch() {
     if (gameMode !== 'chaos') return;
 
-    // Flash único de 200ms na colisão
-    document.body.classList.add('glitch-flash');
+    // Efeito de impacto ao comer (200ms)
+    document.body.classList.add('impact-effect');
     setTimeout(() => {
-        document.body.classList.remove('glitch-flash');
+        document.body.classList.remove('impact-effect');
     }, 200);
 }
 
 function updatePassiveDecay(currentScore) {
     if (gameMode !== 'chaos') {
         noiseTexture.style.opacity = 0.08;
-        if (glitchInterval) clearInterval(glitchInterval);
         return;
     }
 
@@ -309,7 +316,7 @@ function systemShutdown() {
     if (glitchInterval) clearInterval(glitchInterval);
     
     // Aplique um filtro de grayscale(100%) em toda a Landing Page
-    document.body.classList.remove('glitch-flash', 'decay-critical');
+    document.body.classList.remove('impact-effect', 'decay-critical', 'game-active');
     document.body.classList.add('dead-system');
     
     // UI do Modal
@@ -345,6 +352,7 @@ function saveScore(playerName, currentScore) {
 }
 
 restartBtn.addEventListener('click', resetGame);
+homeBtn.addEventListener('click', showMenu);
 
 function placeApple() {
     let valid = false;
@@ -563,3 +571,9 @@ function triggerDpad(keyName) {
     else if (key === 'arrowleft' && dx === 0) { dx = -1; dy = 0; }
     else if (key === 'arrowright' && dx === 0) { dx = 1; dy = 0; }
 }
+
+window.addEventListener("keydown", function(e) {
+    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+        e.preventDefault();
+    }
+}, false);
